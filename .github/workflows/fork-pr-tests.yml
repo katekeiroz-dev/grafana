@@ -1,0 +1,81 @@
+name: Fork PR Tests
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: true
+          CYPRESS_INSTALL_BINARY: 0
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Lint
+        run: yarn lint
+      - name: Unit tests
+        run: yarn test:ci
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Setup Go
+        uses: actions/setup-go@v6.0.0
+        with:
+          go-version-file: go.mod
+      - name: Lint
+        run: make lint-go
+      - name: Unit tests
+        run: make test-go-unit
+      - name: Integration tests (SQLite)
+        run: make test-go-integration
+
+  e2e:
+    name: E2E smoke tests
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Setup Go
+        uses: actions/setup-go@v6.0.0
+        with:
+          go-version-file: go.mod
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: true
+          CYPRESS_INSTALL_BINARY: 0
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium
+      - name: Build frontend
+        run: yarn build
+      - name: Run E2E acceptance tests
+        run: yarn e2e:acceptance
