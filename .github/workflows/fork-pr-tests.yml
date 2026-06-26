@@ -12,8 +12,13 @@ permissions:
 
 jobs:
   frontend:
-    name: Frontend tests
+    name: Frontend tests (${{ matrix.shard }}/${{ matrix.total }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+        total: [4]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -28,11 +33,16 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: true
           CYPRESS_INSTALL_BINARY: 0
       - name: Typecheck
+        if: matrix.shard == 1
         run: yarn typecheck
       - name: Lint
+        if: matrix.shard == 1
         run: yarn lint
       - name: Unit tests
         run: yarn test:ci
+        env:
+          TEST_SHARD: ${{ matrix.shard }}
+          TEST_SHARD_TOTAL: ${{ matrix.total }}
 
   backend:
     name: Backend tests
