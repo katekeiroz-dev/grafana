@@ -43,6 +43,7 @@ jobs:
         env:
           TEST_SHARD: ${{ matrix.shard }}
           TEST_SHARD_TOTAL: ${{ matrix.total }}
+          TEST_MAX_WORKERS: 2
 
   backend:
     name: Backend tests
