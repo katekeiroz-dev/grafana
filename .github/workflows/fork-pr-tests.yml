@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
-        total: [4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        total: [8]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -57,7 +57,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Lint
-        run: make lint-go
+        run: make lint-go-diff
       - name: Unit tests
         run: make test-go-unit
       - name: Integration tests (SQLite)
