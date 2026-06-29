@@ -43,8 +43,8 @@ jobs:
         env:
           TEST_SHARD: ${{ matrix.shard }}
           TEST_SHARD_TOTAL: ${{ matrix.total }}
-          TEST_MAX_WORKERS: 2
-          NODE_OPTIONS: '--max-old-space-size=5120'
+          TEST_MAX_WORKERS: 1
+          NODE_OPTIONS: '--max-old-space-size=6144'
 
   backend:
     name: Backend tests (${{ matrix.shard }}/${{ matrix.total }})
