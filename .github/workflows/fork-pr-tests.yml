@@ -44,10 +44,16 @@ jobs:
           TEST_SHARD: ${{ matrix.shard }}
           TEST_SHARD_TOTAL: ${{ matrix.total }}
           TEST_MAX_WORKERS: 2
+          NODE_OPTIONS: '--max-old-space-size=5120'
 
   backend:
-    name: Backend tests
+    name: Backend tests (${{ matrix.shard }}/${{ matrix.total }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+        total: [2]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -57,11 +63,18 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Lint
+        if: matrix.shard == 1
         run: make lint-go-diff
       - name: Unit tests
         run: make test-go-unit
+        env:
+          SHARD: ${{ matrix.shard }}
+          SHARDS: ${{ matrix.total }}
       - name: Integration tests (SQLite)
         run: make test-go-integration
+        env:
+          SHARD: ${{ matrix.shard }}
+          SHARDS: ${{ matrix.total }}
 
   e2e:
     name: E2E smoke tests
