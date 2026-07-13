@@ -100,6 +100,10 @@ jobs:
           CYPRESS_INSTALL_BINARY: 0
       - name: Install Playwright browsers
         run: yarn playwright install --with-deps chromium
+      - name: Build backend
+        run: make build-go
+        env:
+          CGO_ENABLED: 0
       - name: Build frontend
         run: yarn build
       - name: Run E2E acceptance tests
