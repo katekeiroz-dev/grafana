@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
-        total: [8]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        total: [16]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -39,7 +39,7 @@ jobs:
         if: matrix.shard == 1
         run: yarn lint
       - name: Unit tests
-        run: yarn test:ci
+        run: yarn test:ci --workerIdleMemoryLimit=1024MB
         env:
           TEST_SHARD: ${{ matrix.shard }}
           TEST_SHARD_TOTAL: ${{ matrix.total }}
@@ -75,6 +75,7 @@ jobs:
         env:
           SHARD: ${{ matrix.shard }}
           SHARDS: ${{ matrix.total }}
+          CGO_ENABLED: 0
 
   e2e:
     name: E2E smoke tests
